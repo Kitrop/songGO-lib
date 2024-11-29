@@ -9,10 +9,10 @@ import (
 )
 
 type Song struct {
-	ID          int32
-	GroupName   string
-	Song        string
-	ReleaseDate sql.NullString
-	SongText    sql.NullString
-	Link        sql.NullString
+	ID          int32          `json:"id" example:"1"`
+	GroupName   string         `json:"groupName" example:"Muse"`
+	Song        string         `json:"song" example:"Supermassive Black Hole"`
+	ReleaseDate sql.NullString `json:"releaseDate" swaggertype:"string" example:"16.07.2006"`
+	SongText    sql.NullString `json:"songText,omitempty" swaggertype:"string" example:"Ooh baby, don't you know I suffer?..."`
+	Link        sql.NullString `json:"link,omitempty" swaggertype:"string" example:"https://www.youtube.com/watch?v=Xsp3_a-PMTw"`
 }

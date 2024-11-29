@@ -1,0 +1,240 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API for managing songs.",
+        "title": "Song API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/songs": {
+            "get": {
+                "description": "Retrieves a list of all songs.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all songs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/database.Song"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new song.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create a new song",
+                "parameters": [
+                    {
+                        "description": "Song data",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateSongRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/database.Song"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{id}": {
+            "get": {
+                "description": "Retrieves a song by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get song by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Song ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/database.Song"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing song.",
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Update an existing song",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Song ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Song data",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/database.Song"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a song by its ID.",
+                "summary": "Delete a song",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Song ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "database.Song": {
+            "type": "object",
+            "properties": {
+                "groupName": {
+                    "type": "string",
+                    "example": "Muse"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "link": {
+                    "type": "string",
+                    "example": "https://www.youtube.com/watch?v=Xsp3_a-PMTw"
+                },
+                "releaseDate": {
+                    "type": "string",
+                    "example": "16.07.2006"
+                },
+                "song": {
+                    "type": "string",
+                    "example": "Supermassive Black Hole"
+                },
+                "songText": {
+                    "type": "string",
+                    "example": "Ooh baby, don't you know I suffer?..."
+                }
+            }
+        },
+        "handlers.CreateSongRequest": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string",
+                    "example": "Muse"
+                },
+                "song": {
+                    "type": "string",
+                    "example": "Supermassive Black Hole"
+                }
+            }
+        }
+    }
+}

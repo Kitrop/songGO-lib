@@ -2,77 +2,63 @@ package repository
 
 import (
 	"context"
+	"errors"
 
-	"github.com/Kitrop/songGO-lib/config"
 	"github.com/Kitrop/songGO-lib/database"
 )
 
 type SongRepository struct {
-	queries *database.Queries
+	storage map[int32]*database.Song
+	lastID  int32
 }
 
-func NewSongRepository(ctx context.Context) (*SongRepository, error) {
-	db, err := config.ConnectDB(ctx)
-	if err != nil {
-		return nil, err
+func NewSongRepository() *SongRepository {
+	return &SongRepository{
+		storage: make(map[int32]*database.Song),
+		lastID:  0,
 	}
-	return &SongRepository{queries: database.New(db)}, nil
 }
 
-
-func (r *SongRepository) GetSongs(ctx context.Context, groupName, song, releaseDate *string, offset, limit int) ([]database.Song, error) {
-	params := database.GetSongsParams{
-		Column1: *groupName,
-		Column2: *song,
-		Column3: *releaseDate,
-		Limit:   int32(limit),
-		Offset:  int32(offset),
-	}
-    if groupName == nil { params.Column1 = "" }
-    if song == nil { params.Column2 = "" }
-    if releaseDate == nil { params.Column3 = "" }
-
-
-	songs, err := r.queries.GetSongs(ctx, params)
-	if err != nil {
-		return nil, err
+// Получить список всех песен
+func (repo *SongRepository) GetAllSongs(ctx context.Context) ([]*database.Song, error) {
+	songs := make([]*database.Song, 0, len(repo.storage))
+	for _, song := range repo.storage {
+		songs = append(songs, song)
 	}
 	return songs, nil
 }
 
-func (r *SongRepository) GetSongByID(ctx context.Context, id int32) (*database.Song, error) {
-	song, err := r.queries.GetSongByID(ctx, id)
-	if err != nil {
-		return nil, err
+// Получить песню по ID
+func (repo *SongRepository) GetSongByID(ctx context.Context, id int32) (*database.Song, error) {
+	song, exists := repo.storage[id]
+	if !exists {
+		return nil, errors.New("song not found")
 	}
-	return &song, nil
+	return song, nil
 }
 
-func (r *SongRepository) CreateSong(ctx context.Context, song *database.Song) (*database.Song, error) { //Use database.Song, not models.Song
-	createdSong, err := r.queries.CreateSong(ctx, database.CreateSongParams{
-		GroupName:   song.GroupName,
-		Song:        song.Song,
-		ReleaseDate: song.ReleaseDate,
-		SongText:    song.SongText,
-		Link:        song.Link,
-	})
-	if err != nil {
-		return nil, err
+// Добавить новую песню
+func (repo *SongRepository) CreateSong(ctx context.Context, song *database.Song) (*database.Song, error) {
+	repo.lastID++
+	song.ID = repo.lastID
+	repo.storage[song.ID] = song
+	return song, nil
+}
+
+// Обновить песню
+func (repo *SongRepository) UpdateSong(ctx context.Context, song *database.Song) error {
+	if _, exists := repo.storage[song.ID]; !exists {
+		return errors.New("song not found")
 	}
-	return &createdSong, nil
+	repo.storage[song.ID] = song
+	return nil
 }
 
-func (r *SongRepository) UpdateSong(ctx context.Context, song *database.Song) error {
-	return r.queries.UpdateSong(ctx, database.UpdateSongParams{
-		ID:          song.ID,
-		GroupName:   song.GroupName,
-		Song:        song.Song,
-		ReleaseDate: song.ReleaseDate,
-		SongText:    song.SongText,
-		Link:        song.Link,
-	})
-}
-
-func (r *SongRepository) DeleteSong(ctx context.Context, id int32) error {
-	return r.queries.DeleteSong(ctx, id)
+// Удалить песню
+func (repo *SongRepository) DeleteSong(ctx context.Context, id int32) error {
+	if _, exists := repo.storage[id]; !exists {
+		return errors.New("song not found")
+	}
+	delete(repo.storage, id)
+	return nil
 }

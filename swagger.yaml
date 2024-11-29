@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Song API
+  version: 1.0.0
+paths:
+  /songs:
+    get:
+      summary: Get all songs
+      responses:
+        '200':
+          description: List of songs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Song'
+    post:
+      summary: Create a new song
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSongRequest'
+      responses:
+        '201':
+          description: Song created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+  /songs/{id}:
+    get:
+      summary: Get a song by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Song details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Song'
+    put:
+      summary: Update a song
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSongRequest'
+      responses:
+        '204':
+          description: Song updated
+    delete:
+      summary: Delete a song
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Song deleted
+components:
+  schemas:
+    Song:
+      type: object
+      properties:
+        id:
+          type: integer
+        group_name:
+          type: string
+        song_name:
+          type: string
+    CreateSongRequest:
+      type: object
+      properties:
+        group_name:
+          type: string
+        song_name:
+          type: string
+    UpdateSongRequest:
+      type: object
+      properties:
+        group_name:
+          type: string
+        song_name:
+          type: string
