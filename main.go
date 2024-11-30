@@ -10,8 +10,9 @@ import (
 	"github.com/Kitrop/songGO-lib/config"
 	"github.com/Kitrop/songGO-lib/handlers"
 	"github.com/Kitrop/songGO-lib/repository"
-	"github.com/go-chi/chi"
 
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi"
 	_ "github.com/Kitrop/songGO-lib/docs"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -22,6 +23,10 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
+	// Настройка логгера
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println("[INFO] Запускаем приложение...")
+
 	// Подключаем env
 	config.LoadEnv()
 
@@ -32,10 +37,14 @@ func main() {
 	
 	db, err := config.ConnectDB(ctx)
 	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
+		log.Fatalf("[ERROR] Ошибка подключения к базе данных: %v", err)
 	}
-	defer db.Close()
 
+	// Закрытие подключения к БД
+	defer func() {
+		log.Println("[INFO] Закрытие соединения с базой данных....")
+		db.Close()
+	}()
 
 	// Создаем репозиторий
 	repo := repository.NewSongRepository()
@@ -47,6 +56,10 @@ func main() {
 
 	// Настраиваем маршруты
 	r := chi.NewRouter()
+
+	// Встраиваем middleware
+	r.Use(LoggerMiddleware)        // Логирование запросов
+	r.Use(middleware.Recoverer)    // Восстановление после паники
 
 	// CRUD операции
 	r.Get("/songs", handler.GetAllSongs)        // Получить список всех песен
@@ -62,4 +75,19 @@ func main() {
 	port := os.Getenv("PORT")
 	log.Println("Server is running on port", port)
 	log.Fatal(http.ListenAndServe(port, r))
+}
+
+// LoggerMiddleware логирует информацию о каждом запросе.
+func LoggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		log.Printf("[INFO] Incoming request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+
+		// Передаём управление следующему обработчику
+		next.ServeHTTP(w, r)
+
+		duration := time.Since(start)
+		log.Printf("[INFO] Completed request: %s %s in %v", r.Method, r.URL.Path, duration)
+	})
 }

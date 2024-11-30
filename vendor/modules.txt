@@ -4,6 +4,7 @@ github.com/KyleBanks/depth
 # github.com/go-chi/chi v1.5.5
 ## explicit; go 1.16
 github.com/go-chi/chi
+github.com/go-chi/chi/middleware
 # github.com/go-openapi/jsonpointer v0.21.0
 ## explicit; go 1.20
 github.com/go-openapi/jsonpointer
