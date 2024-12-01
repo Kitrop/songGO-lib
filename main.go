@@ -10,12 +10,15 @@ import (
 	"github.com/Kitrop/songGO-lib/config"
 	"github.com/Kitrop/songGO-lib/handlers"
 	"github.com/Kitrop/songGO-lib/repository"
+	_ "github.com/Kitrop/songGO-lib/docs"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi"
-	_ "github.com/Kitrop/songGO-lib/docs"
+	"github.com/go-chi/chi"	
+
 	httpSwagger "github.com/swaggo/http-swagger"
 )
+
+
 
 // @title Song API
 // @version 1.0
@@ -45,6 +48,11 @@ func main() {
 		log.Println("[INFO] Закрытие соединения с базой данных....")
 		db.Close()
 	}()
+
+	// Выполняем миграции
+	if err := config.MigrateDB(db); err != nil {
+		log.Fatalf("[ERROR] Ошибка миграции базы данных: %v", err)
+	}
 
 	// Создаем репозиторий
 	repo := repository.NewSongRepository()
